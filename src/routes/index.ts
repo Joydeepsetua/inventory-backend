@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 
 import authRoutes from "./auth.routes.js";
+import customerRoutes from "./customer.routes.js";
 
 const app = express();
 
@@ -17,5 +18,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/customers", customerRoutes);
 
 export default app;
