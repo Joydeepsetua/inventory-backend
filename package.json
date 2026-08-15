@@ -8,21 +8,23 @@
   "license": "ISC",
   "author": "Joydeep Setua",
   "type": "module",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node index.js"
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts"
   },
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "joi": "^18.2.3",
-    "mysql2": "^3.23.3"
+    "mysql2": "^3.23.3",
+    "sequelize": "^6.37.8"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "nodemon": "^3.1.14"
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
   }
 }

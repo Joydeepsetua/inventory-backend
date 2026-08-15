@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import app from './src/routes/index.ts';
+import connectDatabase from './src/models/index.ts';
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;
@@ -10,6 +11,7 @@ app.get('/', (req, res) => {
 
 (async () => {
   try {
+    await connectDatabase();
     app.listen(PORT, () => {
       console.log(`🚀 Server is running at http://localhost:${PORT}`);
     });
