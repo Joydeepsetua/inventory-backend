@@ -11,7 +11,10 @@
   "main": "index.ts",
   "scripts": {
     "dev": "tsx watch index.ts",
-    "start": "tsx index.ts"
+    "start": "tsx index.ts",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "db:migrate:status": "sequelize-cli db:migrate:status"
   },
   "dependencies": {
     "cors": "^2.8.6",
@@ -24,6 +27,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "sequelize-cli": "^6.6.5",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2"
   }
