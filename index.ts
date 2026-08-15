@@ -1,12 +1,13 @@
 import dotenv from 'dotenv';
 import app from './src/routes/index.ts';
 import connectDatabase from './src/models/index.ts';
+import { successResponse } from './src/utils/response.ts';
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.send({ message: 'Billing & Inventory API is running', success: true });
+  successResponse(res, 'Billing & Inventory API is running');
 });
 
 (async () => {
