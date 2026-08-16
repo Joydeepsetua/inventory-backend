@@ -38,6 +38,6 @@
     "@types/jsonwebtoken": "^9.0.10",
     "sequelize-cli": "^6.6.5",
     "tsx": "^4.23.12",
-    "typescript": "^7.0.2"
+    "typescript": "^5.9.3"
   }
 }
