@@ -10,11 +10,13 @@ interface InvoiceAttributes {
   invoice_number: string;
   customer_id: string;
   created_by: string;
-  subtotal: number;
-  discount_amount: number;
-  tax_rate: number;
-  tax_amount: number;
-  total_amount: number;
+  // Read shape. DECIMAL is exposed as a fixed 2-decimal string so "499.00"
+  // survives JSON, which cannot represent a trailing zero on a number.
+  subtotal: string;
+  discount_amount: string;
+  tax_rate: string;
+  tax_amount: string;
+  total_amount: string;
   payment_status: "PENDING" | "PAID" | "PARTIAL" | "CANCELLED";
   payment_method: "CASH" | "CARD" | "UPI" | null;
   notes: string | null;
@@ -23,22 +25,33 @@ interface InvoiceAttributes {
   updated_at?: Date;
 }
 
+// Write shape. Callers still pass amounts as plain numbers; only reads are
+// formatted.
 interface InvoiceCreationAttributes
-  extends Optional<
-    InvoiceAttributes,
-    | "id"
-    | "subtotal"
-    | "discount_amount"
-    | "tax_rate"
-    | "tax_amount"
-    | "total_amount"
-    | "payment_status"
-    | "payment_method"
-    | "notes"
-    | "invoice_date"
-    | "created_at"
-    | "updated_at"
-  > {}
+  extends Omit<
+    Optional<
+      InvoiceAttributes,
+      | "id"
+      | "subtotal"
+      | "discount_amount"
+      | "tax_rate"
+      | "tax_amount"
+      | "total_amount"
+      | "payment_status"
+      | "payment_method"
+      | "notes"
+      | "invoice_date"
+      | "created_at"
+      | "updated_at"
+    >,
+    "subtotal" | "discount_amount" | "tax_rate" | "tax_amount" | "total_amount"
+  > {
+  subtotal?: number | string;
+  discount_amount?: number | string;
+  tax_rate?: number | string;
+  tax_amount?: number | string;
+  total_amount?: number | string;
+}
 
 class Invoice
   extends Model<InvoiceAttributes, InvoiceCreationAttributes>
@@ -48,11 +61,11 @@ class Invoice
   declare invoice_number: string;
   declare customer_id: string;
   declare created_by: string;
-  declare subtotal: number;
-  declare discount_amount: number;
-  declare tax_rate: number;
-  declare tax_amount: number;
-  declare total_amount: number;
+  declare subtotal: string;
+  declare discount_amount: string;
+  declare tax_rate: string;
+  declare tax_amount: string;
+  declare total_amount: string;
   declare payment_status: "PENDING" | "PAID" | "PARTIAL" | "CANCELLED";
   declare payment_method: "CASH" | "CARD" | "UPI" | null;
   declare notes: string | null;
@@ -83,12 +96,12 @@ class Invoice
   }
 }
 
-// MySQL returns DECIMAL as a string; cast money columns back to numbers so
-// billing totals stay arithmetic-safe.
+// Money columns always read back as "xxx.00". Billing arithmetic must go
+// through getDataValue(field) so it never operates on the formatted string.
 const decimalAmount = (field: keyof InvoiceAttributes) => ({
-  get(this: Invoice): number {
+  get(this: Invoice): string {
     const value = this.getDataValue(field);
-    return value === null || value === undefined ? 0 : Number(value);
+    return Number(value ?? 0).toFixed(2);
   },
 });
 
