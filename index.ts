@@ -1,14 +1,9 @@
-import dotenv from 'dotenv';
-import app from './src/routes/index.js';
-import connectDatabase from './src/models/index.js';
-import { successResponse } from './src/utils/response.js';
+import "dotenv/config";
 
-dotenv.config();
+import app from "./src/routes/index.js";
+import connectDatabase from "./src/models/index.js";
+
 const PORT = process.env.PORT || 3000;
-
-app.get('/', (req, res) => {
-  successResponse(res, 'Billing & Inventory API is running');
-});
 
 (async () => {
   try {
@@ -17,9 +12,10 @@ app.get('/', (req, res) => {
       console.log(`🚀 Server is running at http://localhost:${PORT}`);
     });
   } catch (exception) {
-    console.log('Something went wrong');
+    console.log("Something went wrong");
     if (exception instanceof Error) {
       console.log(exception.message);
     }
+    process.exit(1);
   }
 })();

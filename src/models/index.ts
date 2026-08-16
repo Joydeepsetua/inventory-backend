@@ -48,6 +48,6 @@ export default async function connectDatabase(): Promise<void> {
   } catch (error) {
     console.error("❌ Unable to connect to MySQL database:", error);
 
-    process.exit(1);
+    throw error;
   }
 }
