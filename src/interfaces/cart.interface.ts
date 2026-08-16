@@ -22,5 +22,5 @@ export interface SetCartCustomerInput {
 export interface CartSummary {
   item_count: number;
   total_quantity: number;
-  subtotal: number;
+  subtotal: string;
 }

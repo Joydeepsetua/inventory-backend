@@ -38,13 +38,21 @@ const customerInclude: IncludeOptions = {
   attributes: ["id", "name", "phone", "email"],
 };
 
+// line_total reads back as a formatted string, so the sum is built from the
+// raw column values and only formatted once at the end.
 const summarize = (rows: Cart[]): CartSummary => {
-  const subtotal = rows.reduce((total, row) => total + row.line_total, 0);
+  const subtotal = rows.reduce(
+    (total, row) =>
+      total +
+      Number(row.getDataValue("unit_price") ?? 0) *
+        Number(row.getDataValue("quantity") ?? 0),
+    0
+  );
 
   return {
     item_count: rows.length,
     total_quantity: rows.reduce((total, row) => total + row.quantity, 0),
-    subtotal: Number(subtotal.toFixed(2)),
+    subtotal: subtotal.toFixed(2),
   };
 };
 
@@ -58,13 +66,9 @@ const loadOpenCart = async (userId: string) => {
     ],
   });
 
-  // customer_id is denormalized onto every row, so any row carries it.
-  const customer = items.length
-    ? ((items[0] as unknown as { customer?: Customer }).customer ?? null)
-    : null;
-
+  // No cart-level customer: every row already carries its own `customer`,
+  // and it stays null until the invoice attaches one.
   return {
-    customer,
     items,
     summary: summarize(items),
   };
@@ -139,7 +143,8 @@ export const addItemToCart = async (
         variant_id,
         sku: variant.sku,
         product_name: `${product.name} - ${variant.name}`,
-        unit_price: variant.price,
+        // Raw column value, not the formatted read — this is a write.
+        unit_price: Number(variant.getDataValue("price") ?? 0),
         quantity,
       },
       { transaction }

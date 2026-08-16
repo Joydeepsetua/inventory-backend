@@ -80,7 +80,15 @@ export const updateProductVariant = async (
   await assertProductExists(input.product_id);
   await assertUniqueSku(input.sku, id);
 
-  variant.set(input);
+  // price is read back as a formatted string, so a numeric update has to be
+  // converted before it is set.
+  const { price, ...rest } = input;
+
+  variant.set(rest);
+
+  if (price !== undefined) {
+    variant.set("price", price.toFixed(2));
+  }
 
   await variant.save();
 

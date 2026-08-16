@@ -14,27 +14,36 @@ interface CartAttributes {
   variant_id: string;
   sku: string;
   product_name: string;
-  unit_price: number;
+  // Read shape. DECIMAL is exposed as a fixed 2-decimal string so "499.00"
+  // survives JSON, which cannot represent a trailing zero on a number.
+  unit_price: string;
   quantity: number;
   status: "ACTIVE" | "CONVERTED" | "ABANDONED";
   // Computed, never stored — see the VIRTUAL column below.
-  line_total?: number;
+  line_total?: string;
   created_at?: Date;
   updated_at?: Date;
 }
 
+// Write shape. Callers still pass unit_price as a plain number; only reads are
+// formatted.
 interface CartCreationAttributes
-  extends Optional<
-    CartAttributes,
-    | "id"
-    | "customer_id"
-    | "invoice_id"
-    | "quantity"
-    | "status"
-    | "line_total"
-    | "created_at"
-    | "updated_at"
-  > {}
+  extends Omit<
+    Optional<
+      CartAttributes,
+      | "id"
+      | "customer_id"
+      | "invoice_id"
+      | "quantity"
+      | "status"
+      | "line_total"
+      | "created_at"
+      | "updated_at"
+    >,
+    "unit_price"
+  > {
+  unit_price: number | string;
+}
 
 class Cart
   extends Model<CartAttributes, CartCreationAttributes>
@@ -47,10 +56,10 @@ class Cart
   declare variant_id: string;
   declare sku: string;
   declare product_name: string;
-  declare unit_price: number;
+  declare unit_price: string;
   declare quantity: number;
   declare status: "ACTIVE" | "CONVERTED" | "ABANDONED";
-  declare readonly line_total: number;
+  declare readonly line_total: string;
   declare readonly created_at: Date;
   declare readonly updated_at: Date;
 
@@ -87,12 +96,12 @@ class Cart
   }
 }
 
-// MySQL returns DECIMAL as a string; cast money columns back to numbers so
-// line calculations stay arithmetic-safe.
+// Money columns always read back as "xxx.00". Arithmetic must go through
+// getDataValue(field) so it never operates on the formatted string.
 const decimalAmount = (field: keyof CartAttributes) => ({
-  get(this: Cart): number {
+  get(this: Cart): string {
     const value = this.getDataValue(field);
-    return value === null || value === undefined ? 0 : Number(value);
+    return Number(value ?? 0).toFixed(2);
   },
 });
 
@@ -181,11 +190,11 @@ Cart.init(
         "unit_price",
         "quantity",
       ]),
-      get(): number {
+      get(): string {
         const price = Number(this.getDataValue("unit_price") ?? 0);
         const quantity = Number(this.getDataValue("quantity") ?? 0);
 
-        return Number((price * quantity).toFixed(2));
+        return (price * quantity).toFixed(2);
       },
     },
 

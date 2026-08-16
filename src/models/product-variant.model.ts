@@ -8,7 +8,9 @@ interface ProductVariantAttributes {
   product_id: string;
   sku: string;
   name: string;
-  price: number;
+  // Read shape. DECIMAL is exposed as a fixed 2-decimal string so "499.00"
+  // survives JSON, which cannot represent a trailing zero on a number.
+  price: string;
   stock_quantity: number;
   low_stock_threshold: number;
   is_active: boolean;
@@ -18,18 +20,25 @@ interface ProductVariantAttributes {
   updated_at?: Date;
 }
 
+// Write shape. Callers still pass price as a plain number; only reads are
+// formatted.
 interface ProductVariantCreationAttributes
-  extends Optional<
-    ProductVariantAttributes,
-    | "id"
-    | "price"
-    | "stock_quantity"
-    | "low_stock_threshold"
-    | "is_active"
-    | "is_low_stock"
-    | "created_at"
-    | "updated_at"
-  > {}
+  extends Omit<
+    Optional<
+      ProductVariantAttributes,
+      | "id"
+      | "price"
+      | "stock_quantity"
+      | "low_stock_threshold"
+      | "is_active"
+      | "is_low_stock"
+      | "created_at"
+      | "updated_at"
+    >,
+    "price"
+  > {
+  price?: number | string;
+}
 
 class ProductVariant
   extends Model<ProductVariantAttributes, ProductVariantCreationAttributes>
@@ -39,7 +48,7 @@ class ProductVariant
   declare product_id: string;
   declare sku: string;
   declare name: string;
-  declare price: number;
+  declare price: string;
   declare stock_quantity: number;
   declare low_stock_threshold: number;
   declare is_active: boolean;
@@ -85,14 +94,14 @@ ProductVariant.init(
     },
 
     price: {
-      // MySQL returns DECIMAL as a string, so cast it back to a number
-      // to keep billing calculations safe.
+      // Always read back as "xxx.00". Arithmetic must go through
+      // getDataValue("price") so it never operates on the formatted string.
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
       defaultValue: 0,
-      get(): number {
+      get(): string {
         const value = this.getDataValue("price");
-        return value === null || value === undefined ? 0 : Number(value);
+        return Number(value ?? 0).toFixed(2);
       },
     },
 
