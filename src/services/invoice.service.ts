@@ -103,8 +103,8 @@ const nextInvoiceNumber = () => {
 
   const suffix = Math.random()
     .toString(36)
-    .slice(2, 6)
-    .padEnd(4, "0")
+    .slice(2, 8)
+    .padEnd(6, "0")
     .toUpperCase();
 
   return `INV-${stamp}-${suffix}`;
