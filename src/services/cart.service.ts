@@ -13,7 +13,7 @@ import {
 
 // The open cart is every row for this user that has not been billed yet.
 // carts and cart_items are one table, so "the cart" is a set of rows, not a row.
-const openCartWhere = (userId: string) => ({
+export const openCartWhere = (userId: string) => ({
   user_id: userId,
   invoice_id: null,
   status: "ACTIVE" as const,

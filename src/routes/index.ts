@@ -7,6 +7,7 @@ import productCategoryRoutes from "./product-category.routes.js";
 import productRoutes from "./product.routes.js";
 import productVariantRoutes from "./product-variant.routes.js";
 import cartRoutes from "./cart.routes.js";
+import invoiceRoutes from "./invoice.routes.js";
 
 const app = express();
 
@@ -27,5 +28,6 @@ app.use("/api/product-categories", productCategoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/product-variants", productVariantRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/invoices", invoiceRoutes);
 
 export default app;
