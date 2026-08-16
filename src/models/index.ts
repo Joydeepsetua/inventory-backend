@@ -1,11 +1,11 @@
-import sequelize from "../database/index.ts";
-import User from "./user.model.ts";
-import ProductCategory from "./product-category.model.ts";
-import Product from "./product.model.ts";
-import ProductVariant from "./product-variant.model.ts";
-import Customer from "./customer.model.ts";
-import Invoice from "./invoice.model.ts";
-import Cart from "./cart.model.ts";
+import sequelize from "../database/index.js";
+import User from "./user.model.js";
+import ProductCategory from "./product-category.model.js";
+import Product from "./product.model.js";
+import ProductVariant from "./product-variant.model.js";
+import Customer from "./customer.model.js";
+import Invoice from "./invoice.model.js";
+import Cart from "./cart.model.js";
 
 const models = {
   User,

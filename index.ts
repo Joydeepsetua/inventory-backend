@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
-import app from './src/routes/index.ts';
-import connectDatabase from './src/models/index.ts';
-import { successResponse } from './src/utils/response.ts';
+import app from './src/routes/index.js';
+import connectDatabase from './src/models/index.js';
+import { successResponse } from './src/utils/response.js';
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;

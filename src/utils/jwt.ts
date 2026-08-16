@@ -1,7 +1,7 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import moment from 'moment';
 import ms, { StringValue } from 'ms';
-import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { JwtPayload } from '../interfaces/jwt-payload.interface.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const ACCESS_EXPIRES_IN = process.env.ACCESS_EXPIRES_IN;
