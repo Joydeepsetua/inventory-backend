@@ -17,6 +17,8 @@ interface CartAttributes {
   unit_price: number;
   quantity: number;
   status: "ACTIVE" | "CONVERTED" | "ABANDONED";
+  // Computed, never stored — see the VIRTUAL column below.
+  line_total?: number;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -29,6 +31,7 @@ interface CartCreationAttributes
     | "invoice_id"
     | "quantity"
     | "status"
+    | "line_total"
     | "created_at"
     | "updated_at"
   > {}
@@ -47,17 +50,13 @@ class Cart
   declare unit_price: number;
   declare quantity: number;
   declare status: "ACTIVE" | "CONVERTED" | "ABANDONED";
+  declare readonly line_total: number;
   declare readonly created_at: Date;
   declare readonly updated_at: Date;
 
   // Once billed, the row is an invoice line item and is frozen.
   get is_locked(): boolean {
     return this.invoice_id !== null || this.status === "CONVERTED";
-  }
-
-  // Derived, not stored — discount and tax are applied at invoice level.
-  get line_total(): number {
-    return Number((this.unit_price * this.quantity).toFixed(2));
   }
 
   static associate(models: {
@@ -173,6 +172,21 @@ Cart.init(
       type: DataTypes.ENUM("ACTIVE", "CONVERTED", "ABANDONED"),
       allowNull: false,
       defaultValue: "ACTIVE",
+    },
+
+    // Not a column — discount and tax are applied at invoice level, so a line
+    // is simply price x quantity. Computed on read so it can never drift.
+    line_total: {
+      type: DataTypes.VIRTUAL(DataTypes.DECIMAL(12, 2), [
+        "unit_price",
+        "quantity",
+      ]),
+      get(): number {
+        const price = Number(this.getDataValue("unit_price") ?? 0);
+        const quantity = Number(this.getDataValue("quantity") ?? 0);
+
+        return Number((price * quantity).toFixed(2));
+      },
     },
 
     created_at: {

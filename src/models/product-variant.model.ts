@@ -12,6 +12,8 @@ interface ProductVariantAttributes {
   stock_quantity: number;
   low_stock_threshold: number;
   is_active: boolean;
+  // Computed, never stored — see the VIRTUAL column below.
+  is_low_stock?: boolean;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -24,6 +26,7 @@ interface ProductVariantCreationAttributes
     | "stock_quantity"
     | "low_stock_threshold"
     | "is_active"
+    | "is_low_stock"
     | "created_at"
     | "updated_at"
   > {}
@@ -40,12 +43,9 @@ class ProductVariant
   declare stock_quantity: number;
   declare low_stock_threshold: number;
   declare is_active: boolean;
+  declare readonly is_low_stock: boolean;
   declare readonly created_at: Date;
   declare readonly updated_at: Date;
-
-  get is_low_stock(): boolean {
-    return this.stock_quantity <= this.low_stock_threshold;
-  }
 
   static associate(models: { Product: typeof Product }) {
     ProductVariant.belongsTo(models.Product, {
@@ -112,6 +112,21 @@ ProductVariant.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
+    },
+
+    // Not a column — computed on read so every response carries the restock
+    // signal without the client re-deriving it.
+    is_low_stock: {
+      type: DataTypes.VIRTUAL(DataTypes.BOOLEAN, [
+        "stock_quantity",
+        "low_stock_threshold",
+      ]),
+      get(): boolean {
+        return (
+          Number(this.getDataValue("stock_quantity")) <=
+          Number(this.getDataValue("low_stock_threshold"))
+        );
+      },
     },
 
     created_at: {
