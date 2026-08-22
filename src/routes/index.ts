@@ -8,6 +8,7 @@ import productRoutes from "./product.routes.js";
 import productVariantRoutes from "./product-variant.routes.js";
 import cartRoutes from "./cart.routes.js";
 import invoiceRoutes from "./invoice.routes.js";
+import dashboardRoutes from "./dashboard.routes.js";
 import { successResponse } from "../utils/response.js";
 
 const app = express();
@@ -35,5 +36,6 @@ app.use("/api/products", productRoutes);
 app.use("/api/product-variants", productVariantRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/invoices", invoiceRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 export default app;
